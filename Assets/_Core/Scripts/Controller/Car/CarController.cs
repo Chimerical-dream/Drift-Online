@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-public class CarController : SimulationBehaviour
+public class CarController : NetworkBehaviour
 {
     public static UnityEvent<CarController> AnnounceLocalPlayer = new UnityEvent<CarController>();
 
@@ -27,6 +27,9 @@ public class CarController : SimulationBehaviour
     public Transform CameraFollowPoint => cameraFollowPoint;
 
     private Controls playerControls;
+
+    [Networked] //NetworkBehaviour only saves correctly when it has [Networked] property for some reason...
+    private int notUsedInt { get; set; }
 
     private Vector2 input;
     [SerializeField]

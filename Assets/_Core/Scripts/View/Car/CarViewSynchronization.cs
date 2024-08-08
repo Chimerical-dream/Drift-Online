@@ -1,7 +1,9 @@
 using ChimeraGames.Fusion;
 using Fusion;
+using Fusion.Sockets;
 using System;
 using UnityEngine;
+using DG.Tweening;
 
 public class CarViewSynchronization : NetworkBehaviour
 {
@@ -17,65 +19,33 @@ public class CarViewSynchronization : NetworkBehaviour
     private float minSlipToActivateFx = 2, slipFxMultiplier = 3f;
     private float[] wheelsRotationSpeed = new float[4];
 
-
     [Networked, Capacity(4)]
-    private NetworkArray<SynchronizationData> synchronizationData { get; }
-    [Networked(OnChanged = nameof(PlayerDataChanged))]
-    private PlayerData playerData { get; set; }
-
-    private void Awake()
-    {
-        FusionConnection.OnDataReceived.AddListener(OnDataRecieved);
-    }
+    private NetworkArray<WheelSynchronizationData> networkedWheelsSynchronizationData { get; }
 
     public void InitAsLocalPlayer()
     {
-        playerData = new PlayerData(SaveSystem.SaveData.Nickname, SaveSystem.CarViewData, FusionConnection.NetworkRunner.LocalPlayer.PlayerId);
-        
-        foreach(var player in FusionConnection.NetworkRunner.ActivePlayers)
-        {
-            if (player.Equals(FusionConnection.NetworkRunner.LocalPlayer))
-            {
-                continue;
-            }
-            FusionConnection.NetworkRunner.SendReliableDataToPlayer(player, SaveSystem.CarViewData.ImageBytes);
-        }
         carViewSetupper.SetPrint(SaveSystem.CarViewData.CarPrintImage);
-        SetupPlayerData();
-
 
         enabled = false;
     }
 
-    public static void PlayerDataChanged(Changed<CarViewSynchronization> changed)
+    public void SetPrint(byte[] imageBytes)
     {
-        changed.Behaviour.SetupPlayerData();
+        carViewSetupper.SetPrint(imageBytes);
     }
 
 
-    private void SetupPlayerData()
+
+    public void SetupPlayerData(PlayerData playerData)
     {
         carViewSetupper.SetColor(playerData.SyncedCarViewData.CarBodyColor);
         carViewSetupper.SetSpoiler(playerData.SyncedCarViewData.SpoilerIndex);
         carViewSetupper.SetPrintValues(playerData.SyncedCarViewData.CarPrintValues);
     }
 
-
-    private void OnDataRecieved(PlayerRef playerRef, ArraySegment<byte> data)
-    {
-        //if (playerRef.PlayerId == playerData.PlayerId)
-        //{
-        //    return;
-        //}
-
-        Debug.Log(FusionConnection.NetworkRunner.LocalPlayer.PlayerId + " GOT DATA FROM " + playerRef.PlayerId);
-
-        carViewSetupper.SetPrint(data.Array);
-    }
-
     public void RotateWheels(WheelCollider[] wheelColliders)
     {
-        SynchronizationData[] synchronizationDatas = new SynchronizationData[synchronizationData.Length];
+        WheelSynchronizationData[] synchronizationDatas = new WheelSynchronizationData[networkedWheelsSynchronizationData.Length];
         for (int i = 0; i < wheelColliders.Length; i++)
         {
             Vector3 pos;
@@ -115,7 +85,7 @@ public class CarViewSynchronization : NetworkBehaviour
 
         for(int i =0; i< synchronizationDatas.Length; i++)
         {
-            synchronizationData.Set(i, synchronizationDatas[i]);
+            networkedWheelsSynchronizationData.Set(i, synchronizationDatas[i]);
         }
     }
 
@@ -138,28 +108,28 @@ public class CarViewSynchronization : NetworkBehaviour
 
     private void SimulateOnOtherClients()
     {
-        SynchronizationData[] synchronizationDatas = synchronizationData.ToArray();
-        for(int i = 0; i< wheelSlipFxs.Length; i++)
+        //WheelSynchronizationData[] synchronizationDatas = networkedWheelsSynchronizationData.ToArray();
+        for (int i = 0; i < wheelSlipFxs.Length; i++)
         {
             var emission = wheelSlipFxs[i].emission;
-            emission.rateOverTime = synchronizationDatas[i].driftFxRateOverTime;
-            emission.rateOverDistance = synchronizationDatas[i].driftFxRateOverDist;
+            emission.rateOverTime = networkedWheelsSynchronizationData.Get(i).driftFxRateOverTime;
+            emission.rateOverDistance = networkedWheelsSynchronizationData.Get(i).driftFxRateOverDist;
         }
 
-        for(int i = 0; i < wheelModels.Length; i++)
+        for (int i = 0; i < wheelModels.Length; i++)
         {
             var wheel = wheelModels[i];
-            wheel.localEulerAngles = new Vector3(0, synchronizationDatas[i].wheelsYrotation, 0);
+            wheel.localEulerAngles = new Vector3(0, networkedWheelsSynchronizationData.Get(i).wheelsYrotation, 0);
 
 
-            float lerpSpeed = Mathf.Abs(synchronizationData[i].wheelsRotationSpeed) > Mathf.Abs(wheelsRotationSpeed[i]) ? 1 : Time.deltaTime * 5f;
-            wheelsRotationSpeed[i] = Mathf.Lerp(wheelsRotationSpeed[i], synchronizationData[i].wheelsRotationSpeed, lerpSpeed);
+            float lerpSpeed = Mathf.Abs(networkedWheelsSynchronizationData[i].wheelsRotationSpeed) > Mathf.Abs(wheelsRotationSpeed[i]) ? 1 : Time.deltaTime * 5f;
+            wheelsRotationSpeed[i] = Mathf.Lerp(wheelsRotationSpeed[i], networkedWheelsSynchronizationData[i].wheelsRotationSpeed, lerpSpeed);
             wheelRotateModels[i].localRotation = Quaternion.Euler(wheelRotateModels[i].localEulerAngles + Vector3.right * wheelsRotationSpeed[i] * Time.deltaTime);
         }
     }
 
     [System.Serializable]
-    public struct SynchronizationData : INetworkStruct
+    public struct WheelSynchronizationData : INetworkStruct
     {
         public float driftFxRateOverTime;
         public float driftFxRateOverDist;

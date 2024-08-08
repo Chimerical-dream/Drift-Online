@@ -1340,9 +1340,9 @@ GameObject:
   - component: {fileID: 1229450772723171562}
   - component: {fileID: 7448772829160282418}
   - component: {fileID: 9122030583898905201}
-  - component: {fileID: 2987686948962899209}
   - component: {fileID: 7069787850202580995}
   - component: {fileID: 7357301910076246240}
+  - component: {fileID: 2113998368664310799}
   m_Layer: 0
   m_Name: Car
   m_TagString: Untagged
@@ -1441,9 +1441,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47d2e3a417ae9bd4488024086a1232fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WordOffset: 0
-  WordCount: 0
-  _interpolationDataSource: 0
   wheelModels:
   - {fileID: 4781465944702594690}
   - {fileID: 2075578606464669857}
@@ -1462,36 +1459,6 @@ MonoBehaviour:
   - {fileID: 9058506960745593780}
   minSlipToActivateFx: 0.1
   slipFxMultiplier: 50
---- !u!114 &2987686948962899209
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2939892416692416961}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1710889294, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WordOffset: 0
-  WordCount: 0
-  _interpolationDataSource: 0
-  InterpolationSpace: 0
-  InterpolationTarget: {fileID: 2870588437321704134}
-  InterpolateErrorCorrection: 1
-  InterpolatedErrorCorrectionSettings:
-    MinRate: 3.3
-    MaxRate: 10
-    PosBlendStart: 0.25
-    PosBlendEnd: 1
-    PosMinCorrection: 0.025
-    PosTeleportDistance: 2
-    RotBlendStart: 0.1
-    RotBlendEnd: 0.5
-    RotTeleportRadians: 1.5
-  UseLegacySharedModeInterpolation: 0
-  TargetInterpolationDelay: 0.03
 --- !u!114 &7069787850202580995
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1504,20 +1471,14 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SortKey: 2082736175
   ObjectInterest: 1
-  DefaultInterestGroups: []
-  DestroyWhenStateAuthorityLeaves: 1
-  AllowStateAuthorityOverride: 0
-  AoiPositionSource: {fileID: 0}
-  Flags: 2305
-  NetworkGuid:
-    RawGuidValue: 80572e19468eb6a43a7b2ec241c7387b
+  Flags: 264449
   NestedObjects: []
   NetworkedBehaviours:
-  - {fileID: 9122030583898905201}
-  - {fileID: 2987686948962899209}
-  SimulationBehaviours:
   - {fileID: 7448772829160282418}
+  - {fileID: 9122030583898905201}
+  - {fileID: 2113998368664310799}
 --- !u!54 &7357301910076246240
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1545,6 +1506,28 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2113998368664310799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2939892416692416961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a591d221a634417e9827eb58e17de84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SyncScale: 0
+  SyncParent: 0
+  _interpolationTarget: {fileID: 2870588437321704134}
+  UsePreciseRotation: 0
+  UseRenderSleepThresholds: 1
+  RenderThresholds:
+    UseEnergy: 1
+    Position: 0.01
+    Rotation: 0.01
+    Scale: 0.01
 --- !u!1 &3263650757666557897
 GameObject:
   m_ObjectHideFlags: 0

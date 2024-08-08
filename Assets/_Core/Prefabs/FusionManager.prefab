@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1626429162424547749}
   - component: {fileID: 1274584054085670581}
+  - component: {fileID: 4188299721519435942}
   m_Layer: 0
   m_Name: FusionManager
   m_TagString: Untagged
@@ -44,6 +45,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9fd0b243d702174e869f2e84a85dfc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  connectOnAwake: 1
+  networkRunner: {fileID: 4188299721519435942}
   playerPrefab: {fileID: 7069787850202580995, guid: 80572e19468eb6a43a7b2ec241c7387b,
     type: 3}
+--- !u!114 &4188299721519435942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7915160098511463855}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1199893898, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

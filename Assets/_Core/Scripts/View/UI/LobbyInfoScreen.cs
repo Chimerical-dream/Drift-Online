@@ -30,8 +30,8 @@ public class LobbyInfoScreen : MonoBehaviour
             await Task.Delay(500);
         }
 
-        enabled = true;
-        roomTitle.text = FusionConnection.NetworkRunner.SessionInfo.Name;
+        roomTitle.text = FusionConnection.NetworkRunner.LocalPlayer.PlayerId.ToString();//.SessionInfo.Name; 
+        //enabled = true;
     }
 
     private void FixedUpdate()
