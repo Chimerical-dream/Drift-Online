@@ -46,12 +46,12 @@ public class CarSynchronizer : NetworkBehaviour
         }
 
         FusionConnection.OnPlayerJoinedSession.AddListener(OnNewPlayerJoined);
-        FinishIniting();
+        AnnounceCar.Invoke(this);
     }
 
     private void FinishIniting()
     {
-        carViewSynchronization.SetupPlayerData(networkedPlayerData);
+        carViewSynchronization.SetupCarViewData(networkedPlayerData.SyncedCarViewData);
         AnnounceCar.Invoke(this);
     }
 

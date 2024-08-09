@@ -121,6 +121,16 @@ namespace ChimeraGames.Fusion
             OnPlayerLeftSession.Invoke(player);
         }
 
+        public void LeaveLobby()
+        {
+            networkRunner.Shutdown(destroyGameObject: true, shutdownReason: ShutdownReason.Ok);
+        }
+
+        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+        {
+            SceneManager.LoadScene(0);
+        }
+
 
         public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
         {
@@ -138,11 +148,6 @@ namespace ChimeraGames.Fusion
         }
 
         public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
-        {
-             
-        }
-
-        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
         {
              
         }

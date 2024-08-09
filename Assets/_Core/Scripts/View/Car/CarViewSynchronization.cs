@@ -25,6 +25,7 @@ public class CarViewSynchronization : NetworkBehaviour
     public void InitAsLocalPlayer()
     {
         carViewSetupper.SetPrint(SaveSystem.CarViewData.CarPrintImage);
+        SetupCarViewData(new SyncedCarViewData(SaveSystem.CarViewData));
 
         enabled = false;
     }
@@ -36,11 +37,11 @@ public class CarViewSynchronization : NetworkBehaviour
 
 
 
-    public void SetupPlayerData(PlayerData playerData)
+    public void SetupCarViewData(SyncedCarViewData syncedCarViewData)
     {
-        carViewSetupper.SetColor(playerData.SyncedCarViewData.CarBodyColor);
-        carViewSetupper.SetSpoiler(playerData.SyncedCarViewData.SpoilerIndex);
-        carViewSetupper.SetPrintValues(playerData.SyncedCarViewData.CarPrintValues);
+        carViewSetupper.SetColor(syncedCarViewData.CarBodyColor);
+        carViewSetupper.SetSpoiler(syncedCarViewData.SpoilerIndex);
+        carViewSetupper.SetPrintValues(syncedCarViewData.CarPrintValues);
     }
 
     public void RotateWheels(WheelCollider[] wheelColliders)

@@ -3,10 +3,12 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using DG.Tweening;
 
 public class CarController : NetworkBehaviour
 {
     public static UnityEvent<CarController> AnnounceLocalPlayer = new UnityEvent<CarController>();
+    public UnityEvent OnDriftStart = new UnityEvent(), OnDriftEnd = new UnityEvent();
 
     public enum CarType
     {
@@ -19,7 +21,7 @@ public class CarController : NetworkBehaviour
     [SerializeField]
     private WheelCollider[] wheelColliders;
     [SerializeField]
-    private float torque, maxSteer, downForceCoef, brakingSpeed, freeDriveBraking;
+    private float torque, maxSteer, downForceCoef, brakingSpeed, freeDriveBraking, handBraking, minDriftAngle;
     [SerializeField]
     private CarType carType;
     [SerializeField]
@@ -31,9 +33,12 @@ public class CarController : NetworkBehaviour
     [Networked] //NetworkBehaviour only saves correctly when it has [Networked] property for some reason...
     private int notUsedInt { get; set; }
 
+    private bool isDrifting = false;
     private Vector2 input;
+    private bool isHandbrakeOn = false;
+    private Tween handbrakeTween;
     [SerializeField]
-    private float steeringProgress, desteerSpeed, steerSpeed, turnRadius;
+    private float steeringProgress, desteerSpeed, steerSpeed, turnRadius, defaultSidewaysStiffness, handbrakeSidewaysStifness;
     [SerializeField]
     private float[] wheelTorque = new float[4], wheelBrake = new float[4];
 
@@ -108,7 +113,8 @@ public class CarController : NetworkBehaviour
     private void DoCameraRotation()
     {
         Quaternion desiredRot;
-        if(rb.velocity.magnitude < 5)
+        float rbVelocity = rb.velocity.magnitude, startCameraRotateVelocity = 3, maxCameraRotateVelocity = 10;
+        if(rbVelocity < startCameraRotateVelocity)
         {
             desiredRot = transform.rotation;
         }
@@ -116,7 +122,9 @@ public class CarController : NetworkBehaviour
         {
             desiredRot = Quaternion.LookRotation(Vector3.ProjectOnPlane(rb.velocity, Vector3.up).normalized, Vector3.up);
         }
-        cameraFollowPoint.rotation = Quaternion.Lerp(cameraFollowPoint.rotation, desiredRot, Time.fixedDeltaTime * 8);
+
+        float cameraRotatingSpeed = Mathf.Clamp01((rbVelocity - startCameraRotateVelocity) / (maxCameraRotateVelocity - startCameraRotateVelocity));
+        cameraFollowPoint.rotation = Quaternion.Lerp(cameraFollowPoint.rotation, desiredRot, Time.fixedDeltaTime * 8 * cameraRotatingSpeed);
 
     }
 
@@ -144,32 +152,22 @@ public class CarController : NetworkBehaviour
         {
             brakeTorque = freeDriveBraking;
         }
+
+        if (isHandbrakeOn)
+        {
+            brakeTorque += handBraking;
+        }
+
         for (int i = 0; i < wheelColliders.Length; i++)
         {
-            wheelColliders[i].brakeTorque = brakeTorque;
+            wheelColliders[i].brakeTorque = brakeTorque + (((i == 2 || i == 3) && isHandbrakeOn) ? handBraking : 0);
             wheelBrake[i] = wheelColliders[i].brakeTorque;
         }
     }
 
     private void RotateWheels()
     {
-        float autoRotateValue = 0;
-
-        Vector3 rbVelocityVector = Vector3.ProjectOnPlane(rb.velocity, transform.up);
-        float rbVelocity = rbVelocityVector.magnitude;
-        rbVelocityVector.Normalize();
-
-        if(rbVelocity > 3f)
-        {
-            autoRotateValue = Mathf.Clamp(Mathf.Deg2Rad * Vector3.SignedAngle(transform.forward, rbVelocityVector, transform.up), -1, 1);
-        }
-
-        if(Mathf.Abs(autoRotateValue) < .1f)
-        {
-            autoRotateValue = 0;
-        }
-        
-
+        float autoRotateValue = CalculateAutoRotation();
 
         if(input.x == 0 && autoRotateValue == 0)
         {
@@ -193,13 +191,11 @@ public class CarController : NetworkBehaviour
         steeringProgress = Mathf.Clamp(steeringProgress, -1, 1);
 
         float halfCarWidth = 1f, carLength = 2.55f;
-        //float turnRadius = Mathf.Clamp(this.turnRadius * rb.velocity.magnitude, 2, 50);// carLength / Mathf.Tan(maxSteer);
         wheelColliders[input.x > 0 ? 0 : 1].steerAngle = Mathf.Rad2Deg * Mathf.Atan(carLength / (turnRadius + halfCarWidth)) * steeringProgress * maxSteer;
         wheelColliders[input.x > 0 ? 1 : 0].steerAngle = Mathf.Rad2Deg * Mathf.Atan(carLength / (turnRadius - halfCarWidth)) * steeringProgress * maxSteer;
     }
 
-
-
+    #region input
     private void OnMoveInput(InputAction.CallbackContext context)
     {
         input = context.ReadValue<Vector2>();
@@ -213,11 +209,70 @@ public class CarController : NetworkBehaviour
 
     private void OnHandBrakeStarted(InputAction.CallbackContext obj)
     {
-        throw new NotImplementedException();
+        handbrakeTween?.Kill();
+        handbrakeTween = DOVirtual.Float(defaultSidewaysStiffness, handbrakeSidewaysStifness, .3f, (float x) => SetRearWheelsSidewaysStifness(x));
+        isHandbrakeOn = true;
     }
 
     private void OnHandBrakeCancelled(InputAction.CallbackContext obj)
     {
-        throw new NotImplementedException();
+        handbrakeTween?.Kill();
+        handbrakeTween = DOVirtual.Float(handbrakeSidewaysStifness, defaultSidewaysStiffness, .3f, (float x) => SetRearWheelsSidewaysStifness(x));
+        isHandbrakeOn = false;
     }
+    #endregion
+
+
+    private void SetRearWheelsSidewaysStifness(float value)
+    {
+        WheelFrictionCurve wheelFrictionCurve = wheelColliders[2].sidewaysFriction;
+        wheelFrictionCurve.stiffness = value;
+        wheelColliders[2].sidewaysFriction = wheelFrictionCurve;
+        wheelColliders[3].sidewaysFriction = wheelFrictionCurve;
+    }
+    private void SetIsDrifting(bool value)
+    {
+        if (value == isDrifting)
+        {
+            return;
+        }
+
+        isDrifting = value;
+
+        if (value)
+        {
+            OnDriftStart.Invoke();
+        }
+        else
+        {
+            OnDriftEnd.Invoke();
+        }
+    }
+
+    private float CalculateAutoRotation()
+    {
+        float autoRotateValue = 0;
+
+        Vector3 rbVelocityVector = Vector3.ProjectOnPlane(rb.velocity, transform.up);
+        float rbVelocity = rbVelocityVector.magnitude;
+        rbVelocityVector.Normalize();
+
+        float driftAngle = Vector3.SignedAngle(transform.forward, rbVelocityVector, transform.up);
+
+        SetIsDrifting(Mathf.Abs(driftAngle) > minDriftAngle);
+
+        float startAutoRotateSpeed = 3f, speedForMaxAutoRotate = 6f;
+        if (rbVelocity > startAutoRotateSpeed)
+        {
+            float autorotateStrength = Mathf.Clamp01((rbVelocity - startAutoRotateSpeed) / (speedForMaxAutoRotate - startAutoRotateSpeed));
+            autoRotateValue = Mathf.Clamp(Mathf.Deg2Rad * driftAngle, -1, 1) * autorotateStrength;
+        }
+
+        if (Mathf.Abs(autoRotateValue) < .1f)
+        {
+            autoRotateValue = 0;
+        }
+        return autoRotateValue;
+    }
+
 }

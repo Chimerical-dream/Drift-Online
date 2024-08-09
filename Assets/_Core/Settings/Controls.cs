@@ -114,6 +114,54 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 }
             ]
+        },
+        {
+            ""name"": ""GameUI"",
+            ""id"": ""95995428-6133-4832-b369-98bdda24cf06"",
+            ""actions"": [
+                {
+                    ""name"": ""OpenInfo"",
+                    ""type"": ""Button"",
+                    ""id"": ""7676a50b-ebe5-4fdd-861f-14e58497bc51"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Menu"",
+                    ""type"": ""Button"",
+                    ""id"": ""86f822e8-0441-4c7b-8892-919cae0890d6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""5c488f96-ef12-4e1e-bad0-3029b3114609"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OpenInfo"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cf8edb4e-76ef-4aec-822a-b2a491aee440"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Menu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -122,6 +170,10 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         m_Driving = asset.FindActionMap("Driving", throwIfNotFound: true);
         m_Driving_HandBrake = m_Driving.FindAction("HandBrake", throwIfNotFound: true);
         m_Driving_Move = m_Driving.FindAction("Move", throwIfNotFound: true);
+        // GameUI
+        m_GameUI = asset.FindActionMap("GameUI", throwIfNotFound: true);
+        m_GameUI_OpenInfo = m_GameUI.FindAction("OpenInfo", throwIfNotFound: true);
+        m_GameUI_Menu = m_GameUI.FindAction("Menu", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -233,9 +285,68 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         }
     }
     public DrivingActions @Driving => new DrivingActions(this);
+
+    // GameUI
+    private readonly InputActionMap m_GameUI;
+    private List<IGameUIActions> m_GameUIActionsCallbackInterfaces = new List<IGameUIActions>();
+    private readonly InputAction m_GameUI_OpenInfo;
+    private readonly InputAction m_GameUI_Menu;
+    public struct GameUIActions
+    {
+        private @Controls m_Wrapper;
+        public GameUIActions(@Controls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @OpenInfo => m_Wrapper.m_GameUI_OpenInfo;
+        public InputAction @Menu => m_Wrapper.m_GameUI_Menu;
+        public InputActionMap Get() { return m_Wrapper.m_GameUI; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(GameUIActions set) { return set.Get(); }
+        public void AddCallbacks(IGameUIActions instance)
+        {
+            if (instance == null || m_Wrapper.m_GameUIActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GameUIActionsCallbackInterfaces.Add(instance);
+            @OpenInfo.started += instance.OnOpenInfo;
+            @OpenInfo.performed += instance.OnOpenInfo;
+            @OpenInfo.canceled += instance.OnOpenInfo;
+            @Menu.started += instance.OnMenu;
+            @Menu.performed += instance.OnMenu;
+            @Menu.canceled += instance.OnMenu;
+        }
+
+        private void UnregisterCallbacks(IGameUIActions instance)
+        {
+            @OpenInfo.started -= instance.OnOpenInfo;
+            @OpenInfo.performed -= instance.OnOpenInfo;
+            @OpenInfo.canceled -= instance.OnOpenInfo;
+            @Menu.started -= instance.OnMenu;
+            @Menu.performed -= instance.OnMenu;
+            @Menu.canceled -= instance.OnMenu;
+        }
+
+        public void RemoveCallbacks(IGameUIActions instance)
+        {
+            if (m_Wrapper.m_GameUIActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IGameUIActions instance)
+        {
+            foreach (var item in m_Wrapper.m_GameUIActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_GameUIActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public GameUIActions @GameUI => new GameUIActions(this);
     public interface IDrivingActions
     {
         void OnHandBrake(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
+    }
+    public interface IGameUIActions
+    {
+        void OnOpenInfo(InputAction.CallbackContext context);
+        void OnMenu(InputAction.CallbackContext context);
     }
 }

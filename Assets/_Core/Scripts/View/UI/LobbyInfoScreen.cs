@@ -14,7 +14,7 @@ public class LobbyInfoScreen : MonoBehaviour
     private List<LobbyPlayerInfo> playerInfos = new List<LobbyPlayerInfo>();
     [SerializeField]
     private Text roomTitle;
-    private Cooldown updateCd = new Cooldown(1.5f);
+    private Cooldown updateCd = new Cooldown(.5f);
 
     private void Awake()
     {
@@ -30,8 +30,8 @@ public class LobbyInfoScreen : MonoBehaviour
             await Task.Delay(500);
         }
 
-        roomTitle.text = FusionConnection.NetworkRunner.LocalPlayer.PlayerId.ToString();//.SessionInfo.Name; 
-        //enabled = true;
+        roomTitle.text = FusionConnection.NetworkRunner.SessionInfo.Name; 
+        enabled = true;
     }
 
     private void FixedUpdate()
@@ -45,8 +45,12 @@ public class LobbyInfoScreen : MonoBehaviour
         int ind = 0;
         foreach(var playerRef in FusionConnection.NetworkRunner.ActivePlayers)
         {
-            NetworkObject player = FusionConnection.NetworkRunner.GetPlayerObject(playerRef);
-            UpdateInfo(ind, player.Name, FusionConnection.NetworkRunner.GetPlayerRtt(playerRef));
+            var car = LobbyController.Instance.GetCar(playerRef.PlayerId);
+            if(car == null)
+            {
+                continue;
+            }
+            UpdateInfo(ind, car.NetworkedPlayerData.Name.ToString(), FusionConnection.NetworkRunner.GetPlayerRtt(playerRef));
             ind++;
         }
 
@@ -58,7 +62,7 @@ public class LobbyInfoScreen : MonoBehaviour
 
     private void UpdateInfo(int ind, string name, double ping)
     {
-        while (playerInfos.Count < ind)
+        while (playerInfos.Count < (ind + 1))
         {
             playerInfos.Add(Instantiate<LobbyPlayerInfo>(playerInfos[0], playerInfos[0].transform.parent));
         }

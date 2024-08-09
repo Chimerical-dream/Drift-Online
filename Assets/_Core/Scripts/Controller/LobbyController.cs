@@ -10,7 +10,9 @@ public class LobbyController : MonoBehaviour
     private static LobbyController instance;
     public static LobbyController Instance => instance;
 
+
     private Dictionary<int, CarSynchronizer> cars = new Dictionary<int, CarSynchronizer>();
+
 
     private void Awake()
     {
@@ -19,6 +21,16 @@ public class LobbyController : MonoBehaviour
         FusionConnection.OnPlayerLeftSession.AddListener(OnPlayerLeftSession);
     }
 
+
+    public CarSynchronizer GetCar(int playerId)
+    {
+        if (!cars.ContainsKey(playerId))
+        {
+            return null;
+        }
+
+        return cars[playerId];
+    }
 
     private void OnPlayerLeftSession(PlayerRef player)
     {

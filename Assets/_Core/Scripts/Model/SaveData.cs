@@ -13,7 +13,7 @@ public class SaveData
         {
             if(value.Length < 3)
             {
-                nickname = defaultNickname;
+                return; nickname = defaultNickname;
             }
             else
             {
@@ -27,6 +27,7 @@ public class SaveData
         }
     }
 
+    [SerializeField]
     private string nickname;
     private string defaultNickname => System.Environment.MachineName;
 
