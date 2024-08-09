@@ -10,6 +10,8 @@ public class CameraController : MonoBehaviour
     private Camera mainCamera;
     [SerializeField]
     private CinemachineVirtualCamera followCam;
+    [SerializeField]
+    private CinemachineBrain cinemachineBrain;
 
 
     private void Awake()
@@ -21,5 +23,11 @@ public class CameraController : MonoBehaviour
     {
         followCam.m_Follow = carController.CameraFollowPoint;
         followCam.m_LookAt = carController.CameraFollowPoint;
+        carController.OnNetworkUpdate.AddListener(OnNetworkUpdate);
+    }
+
+    private void OnNetworkUpdate()
+    {
+        //cinemachineBrain.ManualUpdate();
     }
 }

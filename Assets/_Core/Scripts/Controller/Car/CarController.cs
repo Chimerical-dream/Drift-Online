@@ -9,6 +9,7 @@ public class CarController : NetworkBehaviour
 {
     public static UnityEvent<CarController> AnnounceLocalPlayer = new UnityEvent<CarController>();
     public UnityEvent OnDriftStart = new UnityEvent(), OnDriftEnd = new UnityEvent();
+    public UnityEvent OnNetworkUpdate = new UnityEvent();
 
     public enum CarType
     {
@@ -70,6 +71,9 @@ public class CarController : NetworkBehaviour
         {
             return;
         }
+
+        OnNetworkUpdate.Invoke();
+
         float motorTorque = input.y * torque;
 
         for (int i = 0; i < wheelColliders.Length; i++)
