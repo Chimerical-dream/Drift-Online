@@ -1402,6 +1402,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 437c3575c422e64418a0ee5d7d193c8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnDriftStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDriftEnd:
+    m_PersistentCalls:
+      m_Calls: []
   carView: {fileID: 9122030583898905201}
   rb: {fileID: 7357301910076246240}
   wheelColliders:
@@ -1415,6 +1421,7 @@ MonoBehaviour:
   brakingSpeed: 300
   freeDriveBraking: 50
   handBraking: 200
+  minDriftAngle: 30
   carType: 2
   cameraFollowPoint: {fileID: 4517698000585547522}
   steeringProgress: 0

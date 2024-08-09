@@ -12,9 +12,11 @@ public class CarViewSetupper : MonoBehaviour
     private Spoiler currentSpoiler;
     [SerializeField]
     private SpoilersData spoilersData;
+    private Color currentColor = Color.black;
 
     public void SetColor(Color color)
     {
+        currentColor = color;
         carmeshRenderer.material.color = color;
         currentSpoiler?.ChangeColor(color);
     }
@@ -53,6 +55,6 @@ public class CarViewSetupper : MonoBehaviour
         currentSpoiler =  Instantiate(spoilersData.Spoilers[ind], spoilerParent);
 
 
-        currentSpoiler.ChangeColor(SaveSystem.CarViewData.CarBodyColor);
+        currentSpoiler.ChangeColor(currentColor);
     }
 }

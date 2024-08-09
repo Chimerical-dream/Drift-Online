@@ -21,6 +21,9 @@ public class CarSynchronizer : NetworkBehaviour
     [Networked]
     private PlayerData networkedPlayerData { get; set; }
     public PlayerData NetworkedPlayerData => networkedPlayerData;
+    [Networked]
+    private int networkedScore { get; set; }
+    public int NetworkedScore => networkedScore;
 
     private void Start()
     {
@@ -47,6 +50,11 @@ public class CarSynchronizer : NetworkBehaviour
 
         FusionConnection.OnPlayerJoinedSession.AddListener(OnNewPlayerJoined);
         AnnounceCar.Invoke(this);
+    }
+
+    public void SetScore(int score)
+    {
+        networkedScore = score;
     }
 
     private void FinishIniting()

@@ -258,10 +258,10 @@ public class CarController : NetworkBehaviour
         rbVelocityVector.Normalize();
 
         float driftAngle = Vector3.SignedAngle(transform.forward, rbVelocityVector, transform.up);
-
-        SetIsDrifting(Mathf.Abs(driftAngle) > minDriftAngle);
-
         float startAutoRotateSpeed = 3f, speedForMaxAutoRotate = 6f;
+
+        SetIsDrifting(Mathf.Abs(driftAngle) > minDriftAngle && rbVelocity > startAutoRotateSpeed);
+
         if (rbVelocity > startAutoRotateSpeed)
         {
             float autorotateStrength = Mathf.Clamp01((rbVelocity - startAutoRotateSpeed) / (speedForMaxAutoRotate - startAutoRotateSpeed));
