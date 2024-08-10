@@ -1423,7 +1423,7 @@ MonoBehaviour:
   brakingSpeed: 300
   freeDriveBraking: 50
   handBraking: 200
-  minDriftAngle: 30
+  minDriftAngle: 25
   carType: 2
   cameraFollowPoint: {fileID: 4517698000585547522}
   steeringProgress: 0

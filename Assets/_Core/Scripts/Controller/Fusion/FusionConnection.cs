@@ -83,7 +83,7 @@ namespace ChimeraGames.Fusion
             {
                 GameMode = GameMode.Shared,
                 SessionName = sessionName,
-                PlayerCount = 4,
+                PlayerCount = 6,
                 SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
             });
         }

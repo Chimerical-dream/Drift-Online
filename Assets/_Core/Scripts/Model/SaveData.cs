@@ -33,7 +33,7 @@ public class SaveData
 
     public SaveData()
     {
-        CarViewData = new CarViewData();
+        CarViewData = new CarViewData(defaultValues: true);
         Nickname = defaultNickname;
         Record = 0;
     }

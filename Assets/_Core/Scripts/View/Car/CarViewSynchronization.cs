@@ -57,7 +57,7 @@ public class CarViewSynchronization : NetworkBehaviour
 
 
             float driftAmount = GetDriftAmount(wheelColliders[i]);
-            float fxRateOverDist = driftAmount > 0 ? 1 : 0;
+            float fxRateOverDist = driftAmount > 0 ? 3 : 0;
             float fxRateOverTime = driftAmount * slipFxMultiplier;
 
             var emission = wheelSlipFxs[i].emission;
