@@ -50,7 +50,7 @@ public class LobbyInfoScreen : MonoBehaviour
             {
                 continue;
             }
-            UpdateInfo(ind, car.NetworkedPlayerData.Name.ToString(), car.NetworkedScore, FusionConnection.NetworkRunner.GetPlayerRtt(playerRef));
+            UpdateInfo(ind, car.NetworkedPlayerData.Name.ToString(), car.NetworkedScore, car.GetPing(playerRef));
             ind++;
         }
 
@@ -60,13 +60,13 @@ public class LobbyInfoScreen : MonoBehaviour
         }
     }
 
-    private void UpdateInfo(int ind, string name, int score, double ping)
+    private void UpdateInfo(int ind, string name, int score, int ping)
     {
         while (playerInfos.Count < (ind + 1))
         {
             playerInfos.Add(Instantiate<LobbyPlayerInfo>(playerInfos[0], playerInfos[0].transform.parent));
         }
 
-        playerInfos[ind].ShowInfo(name, (int)(ping * 1000), score);
+        playerInfos[ind].ShowInfo(name, ping, score);
     }
 }

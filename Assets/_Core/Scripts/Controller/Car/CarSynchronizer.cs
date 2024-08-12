@@ -24,6 +24,9 @@ public class CarSynchronizer : NetworkBehaviour
     [Networked]
     private int networkedScore { get; set; }
     public int NetworkedScore => networkedScore;
+    [Networked]
+    private int networkedPing{ get; set; }
+   
 
     private void Start()
     {
@@ -50,6 +53,16 @@ public class CarSynchronizer : NetworkBehaviour
 
         FusionConnection.OnPlayerJoinedSession.AddListener(OnNewPlayerJoined);
         AnnounceCar.Invoke(this);
+    }
+
+    public int GetPing(PlayerRef playerRef)
+    {
+        if (!HasStateAuthority)
+        {
+            return networkedPing;
+        }
+        networkedPing = (int)(FusionConnection.NetworkRunner.GetPlayerRtt(playerRef) * 1000);
+        return networkedPing;
     }
 
     public void SetScore(int score)
